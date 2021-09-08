@@ -1,75 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    public float speed;
-    public float turnspeed;
-    public float gravitymultiplier;
-    private Rigidbody rb;
+    CharacterController characterController;
+    public float MovementSpeed = 1;
+    public float Gravity = 9.8f;
+    private float velocity = 0;
 
-
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        
-
-        rb = GetComponent<Rigidbody>();
-        
-
+        characterController = GetComponent<CharacterController>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // IMPORTANT!!! RIGHT = FORWARD  LEFT = BACKWARD !!!!!
-        
-        
-        Move();
-        Turn();
-        
-        
+        // player movement - forward, backward, left, right
+        float horizontal = Input.GetAxis("Horizontal") * MovementSpeed;
+        float vertical = Input.GetAxis("Vertical") * MovementSpeed;
+        characterController.Move((Vector3.right * horizontal + Vector3.forward * vertical) * Time.deltaTime);
 
-
-    }
-
-    void Move()
-    {
-       
-        if (Input.GetKey(KeyCode.W))
+        // Gravity
+        if (characterController.isGrounded)
         {
-            //rb.AddRelativeForce(Vector3.forward * speed);
-            rb.velocity = transform.forward * speed;
+            velocity = 0;
         }
-        else if (Input.GetKey(KeyCode.S))
+        else
         {
-            //rb.AddRelativeForce(Vector3.back * speed);
-            rb.velocity = transform.forward * -speed;
-        }
-        Vector3 localVelocity = transform.InverseTransformDirection(rb.velocity);
-        localVelocity.z = 0;
-        //rb.velocity = transform.TransformDirection(localVelocity);
-       
-        
-       
-
-        
-
-    }
-
-    void Turn()
-    {
-        if (Input.GetKey(KeyCode.D))
-        {
-            //rb.AddTorque(Vector3.up * turnspeed);
-            transform.Rotate(Vector3.up, turnspeed * Time.deltaTime);
-        }
-        else if (Input.GetKey(KeyCode.A))
-        {
-            //rb.AddTorque(-Vector3.up * turnspeed);
-            transform.Rotate(Vector3.down, turnspeed * Time.deltaTime);
+            velocity -= Gravity * Time.deltaTime;
+            characterController.Move(new Vector3(0, velocity, 0));
         }
     }
 }
